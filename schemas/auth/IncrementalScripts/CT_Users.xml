@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="CT_Users" author="ivan">
+    <preConditions onFail="CONTINUE">
+        <not>
+            <tableExists tableName="users" schemaName="auth"/>
+        </not>
+    </preConditions>
+    
+    <createTable tableName="users" schemaName="auth" remarks="Учетные записи пользователей">
+        <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()" remarks="Уникальный идентификатор">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+
+        <column name="email" type="VARCHAR(255)" remarks="Уникальный email пользователя">
+            <constraints nullable="false" unique="true" uniqueConstraintName="uq_user_accounts_email"/>
+        </column>
+
+        <column name="password_hash" type="VARCHAR(255)" remarks="Bcrypt hash пароля">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="is_active" type="BOOLEAN" defaultValue="true" remarks="Флаг активности учетной записи">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+
+    <createIndex tableName="users" indexName="idx_users_email" schemaName="auth">
+        <column name="email"/>
+    </createIndex>
+</changeSet>
+</databaseChangeLog>

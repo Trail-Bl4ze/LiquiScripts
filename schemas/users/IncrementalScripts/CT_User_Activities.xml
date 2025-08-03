@@ -1,0 +1,66 @@
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    
+    <changeSet id="CT_User_Activities" author="ivan">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <tableExists tableName="user_activities" schemaName="user"/>
+            </not>
+        </preConditions>
+
+        <!-- Создаем тип для координат -->
+        <sql>CREATE TYPE user.photo_coordinate AS (latitude DOUBLE PRECISION, longitude DOUBLE PRECISION);</sql>
+
+        <createTable tableName="user_activities" schemaName="user" remarks="Активности пользователей с геометкой">
+            <column name="id" type="UUID" remarks="Уникальный идентификатор активности">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="Ссылка на пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="coordinate" type="user.photo_coordinate" remarks="Геокоординаты места">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(255)" remarks="Заголовок активности">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="text" type="TEXT" remarks="Текст описания">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="image_urls" type="TEXT[]" remarks="Массив URL изображений">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Внешний ключ на пользователя -->
+        <addForeignKeyConstraint 
+            baseTableName="user_activities"
+            baseColumnNames="user_id"
+            constraintName="fk_user_activities_user"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            referencedSchemaName="auth"
+            onDelete="CASCADE"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="user_activities" indexName="idx_user_activity_user_id" schemaName="user">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="user_activities" indexName="idx_user_activity_coordinate" schemaName="user">
+            <column name="coordinate"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

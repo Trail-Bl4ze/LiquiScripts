@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    
+    <changeSet id="CT_Refresh_Token" author="ivan">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <tableExists tableName="refresh_tokens" schemaName="auth"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="refresh_tokens" schemaName="auth" remarks="Refresh-токены для аутентификации">
+            <column name="id" type="UUID" remarks="Уникальный идентификатор записи">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            
+            <column name="token" type="VARCHAR(512)" remarks="Уникальный JWT refresh-token">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            
+            <column name="expires_at" type="TIMESTAMPTZ" remarks="Дата и время истечения срока действия">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="is_revoked" type="BOOLEAN" defaultValue="false" remarks="Флаг отзыва токена">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="user_id" type="UUID" remarks="Ссылка на пользователя в таблице auth.users">
+                <constraints nullable="false" foreignKeyName="fk_refresh_tokens_user"/>
+            </column>
+            
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания записи">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_token" schemaName="auth" unique="true">
+            <column name="token"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Добавление внешнего ключа к таблице refresh_tokens -->
+    <changeSet id="FK_Refresh_Tokens_User" author="ivan">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="refresh_tokens" schemaName="auth"/>
+            <tableExists tableName="users" schemaName="auth"/>
+        </preConditions>
+        <addForeignKeyConstraint 
+            baseTableName="refresh_tokens"
+            baseColumnNames="user_id"
+            constraintName="fk_refresh_tokens_user"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"
+            onUpdate="RESTRICT"/>
+    </changeSet>
+</databaseChangeLog>

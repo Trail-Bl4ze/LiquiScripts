@@ -1,0 +1,89 @@
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+    
+    <changeSet id="CT_User_Profiles" author="ivan">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <tableExists tableName="user_profiles" schemaName="users"/>
+            </not>
+            <tableExists tableName="users" schemaName="auth"/>
+        </preConditions>
+
+        <createTable tableName="user_profiles" schemaName="users" remarks="Профили пользователей">
+            <column name="id" type="UUID" remarks="Уникальный идентификатор профиля">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID" remarks="Ссылка на пользователя">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_user_profiles_user_id"/>
+            </column>
+
+            <column name="first_name" type="VARCHAR(50)" remarks="Имя пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_name" type="VARCHAR(50)" remarks="Фамилия пользователя">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="bio" type="VARCHAR(500)" remarks="Краткая биография">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="birth_date" type="DATE" remarks="Дата рождения">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="gender" type="VARCHAR(20)" remarks="Пол">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="profile_photo_url" type="TEXT" remarks="URL аватара профиля">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания профиля">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMPTZ" remarks="Дата последнего обновления">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Внешний ключ на основную таблицу пользователей -->
+        <addForeignKeyConstraint 
+            baseTableName="user_profiles"
+            baseSchemaName="users"
+            baseColumnNames="user_id"
+            constraintName="fk_user_profiles_user"
+            referencedTableName="users"
+            referencedSchemaName="auth"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <!-- Индекс для поиска по имени/фамилии -->
+        <createIndex tableName="user_profiles" indexName="idx_user_profiles_name" schemaName="users">
+            <column name="first_name"/>
+            <column name="last_name"/>
+        </createIndex>
+
+        <!-- Триггер для автоматического обновления updated_at -->
+        <sql>
+            CREATE OR REPLACE FUNCTION users.update_user_profile_timestamp()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = NOW();
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_user_profile_update
+            BEFORE UPDATE ON users.user_profiles
+            FOR EACH ROW EXECUTE FUNCTION users.update_user_profile_timestamp();
+        </sql>
+    </changeSet>
+</databaseChangeLog>
