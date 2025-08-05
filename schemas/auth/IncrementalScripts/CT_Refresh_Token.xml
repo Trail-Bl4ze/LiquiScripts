@@ -51,9 +51,11 @@
         </preConditions>
         <addForeignKeyConstraint 
             baseTableName="refresh_tokens"
+            baseTableSchemaName="auth"
             baseColumnNames="user_id"
             constraintName="fk_refresh_tokens_user"
             referencedTableName="users"
+            referencedTableSchemaName="auth"
             referencedColumnNames="id"
             onDelete="CASCADE"
             onUpdate="RESTRICT"/>

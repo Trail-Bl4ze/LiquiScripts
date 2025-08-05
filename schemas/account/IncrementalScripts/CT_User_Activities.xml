@@ -7,14 +7,15 @@
     <changeSet id="CT_User_Activities" author="ivan">
         <preConditions onFail="CONTINUE">
             <not>
-                <tableExists tableName="user_activities" schemaName="user"/>
+                <tableExists tableName="user_activities" schemaName="account"/>
             </not>
+            <tableExists tableName="users" schemaName="auth"/>
         </preConditions>
 
         <!-- Создаем тип для координат -->
-        <sql>CREATE TYPE user.photo_coordinate AS (latitude DOUBLE PRECISION, longitude DOUBLE PRECISION);</sql>
+        <sql>CREATE TYPE account.photo_coordinate AS (latitude DOUBLE PRECISION, longitude DOUBLE PRECISION);</sql>
 
-        <createTable tableName="user_activities" schemaName="user" remarks="Активности пользователей с геометкой">
+        <createTable tableName="user_activities" schemaName="account" remarks="Активности пользователей с геометкой">
             <column name="id" type="UUID" remarks="Уникальный идентификатор активности">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -23,7 +24,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="coordinate" type="user.photo_coordinate" remarks="Геокоординаты места">
+            <column name="coordinate" type="account.photo_coordinate" remarks="Геокоординаты места">
                 <constraints nullable="false"/>
             </column>
 
@@ -47,19 +48,20 @@
         <!-- Внешний ключ на пользователя -->
         <addForeignKeyConstraint 
             baseTableName="user_activities"
+            baseTableSchemaName="account"
             baseColumnNames="user_id"
             constraintName="fk_user_activities_user"
             referencedTableName="users"
+            referencedTableSchemaName="auth"
             referencedColumnNames="id"
-            referencedSchemaName="auth"
             onDelete="CASCADE"/>
 
         <!-- Индексы -->
-        <createIndex tableName="user_activities" indexName="idx_user_activity_user_id" schemaName="user">
+        <createIndex tableName="user_activities" indexName="idx_user_activity_user_id" schemaName="account">
             <column name="user_id"/>
         </createIndex>
 
-        <createIndex tableName="user_activities" indexName="idx_user_activity_coordinate" schemaName="user">
+        <createIndex tableName="user_activities" indexName="idx_user_activity_coordinate" schemaName="account">
             <column name="coordinate"/>
         </createIndex>
     </changeSet>

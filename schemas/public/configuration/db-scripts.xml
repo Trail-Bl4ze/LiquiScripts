@@ -6,5 +6,5 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <include file="../IncrementalScripts/create-schema-auth.xml" relativeToChangelogFile="true"/>
-    <include file="../IncrementalScripts/create-schema-users.xml" relativeToChangelogFile="true"/>
+    <include file="../IncrementalScripts/create-schema-account.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

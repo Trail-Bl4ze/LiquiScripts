@@ -3,10 +3,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-<changeSet id="create-schema-users" author="ivan">
+<changeSet id="create-schema-account" author="ivan">
 <preConditions onFail="CONTINUE">
-<sqlCheck expectedResult="0">select count(*) from pg_catalog.pg_namespace where nspname = 'users'</sqlCheck>
+<sqlCheck expectedResult="0">select count(*) from pg_catalog.pg_namespace where nspname = 'account'</sqlCheck>
 </preConditions>
-<sql>create schema users</sql>
+<sql>create schema account</sql>
 </changeSet>
 </databaseChangeLog>
