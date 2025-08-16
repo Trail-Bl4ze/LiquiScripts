@@ -4,15 +4,15 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
     
-    <changeSet id="CT_User_Activities" author="ivan">
+    <changeSet id="CT_Activities" author="ivan">
         <preConditions onFail="CONTINUE">
             <not>
-                <tableExists tableName="user_activities" schemaName="account"/>
+                <tableExists tableName="activities" schemaName="activity"/>
             </not>
             <tableExists tableName="users" schemaName="auth"/>
         </preConditions>
 
-        <createTable tableName="user_activities" schemaName="account" remarks="Активности пользователей с геометкой">
+        <createTable tableName="activities" schemaName="activity" remarks="Активности пользователей">
             <column name="id" type="UUID" remarks="Уникальный идентификатор активности">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -25,7 +25,7 @@
                 <constraints nullable="true"/>
             </column>
 
-            <column name="text" type="TEXT" remarks="Текст описания">
+            <column name="description" type="TEXT" remarks="Текст описания">
                 <constraints nullable="true"/>
             </column>
 
@@ -44,26 +44,34 @@
             <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP" remarks="Дата создания">
                 <constraints nullable="false"/>
             </column>
+
+            <column name="likes_count" type="INTEGER" remarks="Количество лайков">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="comments_count" type="INTEGER" remarks="Количество комментариев">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
 
         <!-- Внешний ключ на пользователя -->
         <addForeignKeyConstraint 
-            baseTableName="user_activities"
-            baseTableSchemaName="account"
+            baseTableName="activities"
+            baseTableSchemaName="activity"
             baseColumnNames="user_id"
-            constraintName="fk_user_activities_user"
+            constraintName="fk_activities_user"
             referencedTableName="users"
             referencedTableSchemaName="auth"
             referencedColumnNames="id"
             onDelete="CASCADE"/>
 
         <!-- Индексы -->
-        <createIndex tableName="user_activities" indexName="idx_user_activity_user_id" schemaName="account">
+        <createIndex tableName="activities" indexName="idx_activity_user_id" schemaName="activity">
             <column name="user_id"/>
         </createIndex>
 
         <!-- Составной индекс для координат -->
-        <createIndex tableName="user_activities" indexName="idx_user_activity_coordinates" schemaName="account">
+        <createIndex tableName="activities" indexName="idx_activity_coordinates" schemaName="activity">
             <column name="latitude"/>
             <column name="longitude"/>
         </createIndex>
